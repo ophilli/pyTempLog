@@ -5,7 +5,7 @@ import mysql.connector
 
 logging.basicConfig(filename='temp.log', level=logging.INFO)
 
-api = '/api/printer/tool?history=true'
+api = '/api/printer/tool?history=true&limit=241'
 add_ext = """INSERT INTO `ophilli`.`Temperatures` (`Temp_Actual`, `Temp_Target`, `Serial_Number`, `Time`) VALUES (%s, %s, %s, %s)"""
 
 try:
