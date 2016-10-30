@@ -68,7 +68,7 @@ for i in hosts:
 	    raise ApiError('BED ERROR')
 
 	rExt = respExt.json()
-        rBed = respBed.json()
+	rBed = respBed.json()
 
 	for j in rExt['history']:
 	    data_ext = (j['tool0']['actual'], j['tool0']['target'], hosts.index(i), datetime.datetime.fromtimestamp(j['time']))
