@@ -27,14 +27,14 @@ cursor = cnx.cursor()
 
 headers = { 'X-Api-Key' : '7AA24AC7430A43ABAEA065C83458270C' }
 
-hosts = {
+hosts = [
 	10156, 
 	10306, 
 	10307, 
 	10308, 
 	10309, 
 	10310
-    }
+    ]
 
 for i in hosts:
 	respExt = requests.get('http://series1-' + str(i) + '.local:5000' + api_ext, headers=headers)
