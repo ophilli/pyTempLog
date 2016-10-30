@@ -24,6 +24,28 @@ except mysql.connector.Error as err:
 
 cursor = cnx.cursor()
 
+headers = { 'X-Api-Key' : 'E09D1F4FA1304F05A9DC9E6283D23674' }
+
+respExt = requests.get('http://octopi3.local' + api_ext, headers=headers)
+respBed = requests.get('http://octopi3.local' + api_bed, headers=headers)
+
+if respExt.status_code != 200:
+    raise ApiError('EXT ERROR')
+if respBed.status_code != 200:
+    raise ApiError('BED ERROR')
+
+rExt = respExt.json()
+rBed = respBed.json()
+
+for j in rExt['history']:
+    data_ext = (j['tool0']['actual'], j['tool0']['target'], 6, datetime.datetime.fromtimestamp(j['time']))
+    cursor.execute(add_ext, data_ext)
+
+for k in rBed['history']:
+    data_bed = (k['bed']['actual'], k['bed']['target'], 6, datetime.datetime.fromtimestamp(k['time']))
+    cursor.execute(add_bed, data_bed)
+
+
 
 headers = { 'X-Api-Key' : '7AA24AC7430A43ABAEA065C83458270C' }
 
