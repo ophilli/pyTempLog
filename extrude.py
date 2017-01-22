@@ -2,14 +2,13 @@ import logging
 import requests
 import json
 
-api = '/api/printer/printhead'
+api = '/api/printer/tool'
 
 headersi = { 'Content-Type': 'application/json',
 	    'X-Api-Key' : '7AA24AC7430A43ABAEA065C83458270C' }
-datai = { "command" : "jog",
-	  "x": 0,
-	  "y": 0,
-	  "z": 100}
+datai = { "command" : "extrude",
+	  "amount": 50
+	}
 
 hosts = [
 	10306,

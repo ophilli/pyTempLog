@@ -2,14 +2,13 @@ import logging
 import requests
 import json
 
-api = '/api/printer/printhead'
+api = '/api/printer/tool'
 
 headersi = { 'Content-Type': 'application/json',
 	    'X-Api-Key' : '7AA24AC7430A43ABAEA065C83458270C' }
-datai = { "command" : "jog",
-	  "x": 0,
-	  "y": 0,
-	  "z": 100}
+datai = { "command" : "target",
+	  "targets" : { "tool0": 0 }
+	}
 
 hosts = [
 	10306,
@@ -22,4 +21,4 @@ hosts = [
 
 for i in hosts:
 	resp = requests.post('http://series1-' + str(i) + '.local:5000' + api, data=json.dumps(datai), headers=headersi)
-	#print(resp.status_code)
+	print(resp.status_code)
