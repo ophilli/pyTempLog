@@ -1,87 +1,60 @@
 import logging
 import requests
-import datetime
-import mysql.connector
-from mysql.connector import errorcode
+import configparser
+import pymysql.cursors
+from datetime import datetime
 
-logging.basicConfig(filename='temp.log', level=logging.INFO)
+logging.basicConfig(filename='temp.log', level=logging.WARNING)
 
-api_ext = '/api/printer/tool?history=true'
+api_tool = '/api/printer/tool?history=true'
 api_bed = '/api/printer/bed?history=true'
 
-add_ext = """INSERT IGNORE INTO `ophilli`.`ext_Temp` (`Temp_Actual`, `Temp_Target`, `Mach_Key`, `Time`) VALUES (%s, %s, %s, %s)"""
-add_bed = """INSERT IGNORE INTO `ophilli`.`bed_Temp` (`Temp_Actual`, `Temp_Target`, `Mach_Key`, `Time`) VALUES (%s, %s, %s, %s)"""
-
-try:
-    cnx = mysql.connector.connect(user='ophilli', password='=t%I#49Hzm3J', host='sbxmysql.clemson.edu', database='ophilli')
-
-except mysql.connector.Error as err:
-  if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-    print("Something is wrong with your user name or password")
-  elif err.errno == errorcode.ER_BAD_DB_ERROR:
-    print("Database does not exist")
-  else:
-    print(err)
-
-cursor = cnx.cursor()
-
-#headers = { 'X-Api-Key' : 'E09D1F4FA1304F05A9DC9E6283D23674' }
-#
-#respExt = requests.get('http://octopi3.local' + api_ext, headers=headers)
-#respBed = requests.get('http://octopi3.local' + api_bed, headers=headers)
-#
-#if respExt.status_code != 200:
-#    raise ApiError('EXT ERROR')
-#if respBed.status_code != 200:
-#    raise ApiError('BED ERROR')
-#
-#rExt = respExt.json()
-#rBed = respBed.json()
-#
-#for j in rExt['history']:
-#    data_ext = (j['tool0']['actual'], j['tool0']['target'], 6, datetime.datetime.fromtimestamp(j['time']))
-#    cursor.execute(add_ext, data_ext)
-#
-#for k in rBed['history']:
-#    data_bed = (k['bed']['actual'], k['bed']['target'], 6, datetime.datetime.fromtimestamp(k['time']))
-#    cursor.execute(add_bed, data_bed)
-
-
-
-headers = { 'X-Api-Key' : '7AA24AC7430A43ABAEA065C83458270C' }
+sql_tool = """INSERT IGNORE INTO `ext_Temp` (`Temp_Actual`, `Temp_Target`, `Mach_Key`, `Time`) VALUES (%s, %s, %s, %s)"""
+sql_bed = """INSERT IGNORE INTO `bed_Temp` (`Temp_Actual`, `Temp_Target`, `Mach_Key`, `Time`) VALUES(%s, %s, %s, %s)"""
 
 hosts = [
-	10156, 
-	10306, 
-	10307, 
-	10308, 
-	10309, 
-	10310
+	{'url' : 'http://series1-10156.local:5000', 'headers' : {'X-Api-Key' : '7AA24AC7430A43ABAEA065C83458270C'}},
+	{'url' : 'http://series1-10306.local:5000', 'headers' : {'X-Api-Key' : '7AA24AC7430A43ABAEA065C83458270C'}},
+	{'url' : 'http://series1-10307.local:5000', 'headers' : {'X-Api-Key' : '7AA24AC7430A43ABAEA065C83458270C'}},
+	{'url' : 'http://series1-10308.local:5000', 'headers' : {'X-Api-Key' : '7AA24AC7430A43ABAEA065C83458270C'}},
+	{'url' : 'http://series1-10309.local:5000', 'headers' : {'X-Api-Key' : '7AA24AC7430A43ABAEA065C83458270C'}},
+	{'url' : 'http://series1-10310.local:5000', 'headers' : {'X-Api-Key' : '7AA24AC7430A43ABAEA065C83458270C'}},
+	{'url' : 'http://octopi.local', 'headers' : {'X-Api-Key' : '034769AFEB794CA5AC2E19D36DD89893'}}	
     ]
 
-for i in hosts:
-	respExt = requests.get('http://series1-' + str(i) + '.local:5000' + api_ext, headers=headers)
-	respBed = requests.get('http://series1-' + str(i) + '.local:5000' + api_bed, headers=headers)
-	
-	if respExt.status_code != 200:
-	    raise ApiError('EXT ERROR')
-	if respBed.status_code != 200:
-	    raise ApiError('BED ERROR')
+config = configparser.RawConfigParser()
+config.read('secrets.cfg')
 
-	rExt = respExt.json()
-	rBed = respBed.json()
+connection = pymysql.connect(host=config.get('_sql', 'hostname'),
+				user=config.get('_sql', 'username'),
+				password=config.get('_sql', 'password'),
+				db=config.get('_sql', 'database')
+			)
+try:
+	with connection.cursor() as cursor:
+		for i in hosts:
+			r_tool = requests.get(i['url'] + api_tool, headers=i['headers'])
+			r_bed = requests.get(i['url'] + api_bed, headers=i['headers'])
 
-	for j in rExt['history']:
-		data_ext = (j['tool0']['actual'], j['tool0']['target'], hosts.index(i), datetime.datetime.fromtimestamp(j['time']))
-		cursor.execute(add_ext, data_ext)
+			if r_tool.status_code != 200:
+				logging.error(r_tool.status_code, datetime.now())
+			if r_bed.status_code != 200:
+				logging.error(r_tool.status_code, datetime.now())
 
-	for k in rBed['history']:
-		data_bed = (k['bed']['actual'], k['bed']['target'], hosts.index(i), datetime.datetime.fromtimestamp(k['time']))
-		cursor.execute(add_bed, data_bed)
+			j_tool = r_tool.json()
+			j_bed = r_bed.json()
 
-cnx.commit()
+			for j in j_tool['history']:
+				d_tool = (j['tool0']['actual'], j['tool0']['target'], hosts.index(i), datetime.fromtimestamp(j['time']))
+				cursor.execute(sql_tool, d_tool)
 
-cursor.close()
-cnx.close()
+			for j in j_bed['history']:
+				d_bed = (j['bed']['actual'], j['bed']['target'], hosts.index(i), datetime.fromtimestamp(j['time']))
+				cursor.execute(sql_bed, d_bed)
 
-logging.info('Everything looks good at %s', datetime.datetime.now())
+			connection.commit()
+
+finally:
+	connection.close()
+
+	logging.warning('Everything looks good at %s', datetime.now())
