@@ -19,7 +19,7 @@ hosts = [
 	{'url' : 'http://series1-10308.local:5000', 'headers' : {'X-Api-Key' : '7AA24AC7430A43ABAEA065C83458270C'}},
 	{'url' : 'http://series1-10309.local:5000', 'headers' : {'X-Api-Key' : '7AA24AC7430A43ABAEA065C83458270C'}},
 	{'url' : 'http://series1-10310.local:5000', 'headers' : {'X-Api-Key' : '7AA24AC7430A43ABAEA065C83458270C'}},
-	{'url' : 'http://octopi.local', 'headers' : {'X-Api-Key' : '034769AFEB794CA5AC2E19D36DD89893'}}	
+	{'url' : 'http://octopi.local', 'headers' : {'X-Api-Key' : 'A1A49A92A732420AAF0514D6E40FDF5B'}}	
     ]
 
 config = configparser.RawConfigParser()
