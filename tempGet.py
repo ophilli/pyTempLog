@@ -39,7 +39,7 @@ try:
 			if r_tool.status_code != 200:
 				logging.error(r_tool.status_code, datetime.now())
 			if r_bed.status_code != 200:
-				logging.error(r_tool.status_code, datetime.now())
+				logging.error(r_bed.status_code, datetime.now())
 
 			j_tool = r_tool.json()
 			j_bed = r_bed.json()
